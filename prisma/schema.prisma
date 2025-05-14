@@ -1,0 +1,153 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum GoalType {
+  GAIN_WEIGHT
+  MAINTAIN_WEIGHT
+  LOSE_WEIGHT
+}
+
+enum WorkoutsPerWeek {
+  LOW_0_2
+  MEDIUM_3_5
+  HIGH_6_PLUS
+}
+
+enum TriedOtherApps {
+  YES
+  NO
+}
+
+enum Goal {
+  GAIN_WEIGHT
+  MAINTAIN_WEIGHT
+  LOSE_WEIGHT
+}
+
+enum MainChallenge {
+  INCONSISTENCY
+  UNHEALTHY_EATING
+  LACK_OF_SUPPORT
+  BUSY_SCHEDULE
+  NO_MEAL_INSPIRATION
+}
+
+enum DietType {
+  CLASSIC
+  PESCETARIAN
+  VEGETARIAN
+  VEGAN
+}
+
+enum DesiredOutcome {
+  HEALTHIER_LIFESTYLE
+  MORE_ENERGY_AND_MOOD
+  CONSISTENCY_AND_MOTIVATION
+  BETTER_BODY_IMAGE
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String?          @unique
+  password        String?
+  deviceId        String           @unique
+  name            String?
+  lastname        String?
+  userDetail      UserDetail?
+  healthPlanForms HealthPlanForm[]
+  HealthPlan      HealthPlan[]
+  Meal            Meal[]
+  role            Role             @default(USER)
+  globalStatus    GlobalStatus     @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model UserDetail {
+  id                              String         @id @default(uuid())
+  user                            User           @relation(fields: [userId], references: [id])
+  userId                          String         @unique
+  gender                          Gender
+  dateOfBirth                     DateTime
+  height                          Float
+  weight                          Float
+  triedOtherApps                  TriedOtherApps
+  isInitialHealthPlanFormComplete Boolean?
+  globalStatus                    GlobalStatus   @default(ACTIVE)
+  createdAt                       DateTime       @default(now())
+  updatedAt                       DateTime       @updatedAt
+}
+
+model HealthPlanForm {
+  id                  String          @id @default(uuid())
+  user                User            @relation(fields: [userId], references: [id])
+  userId              String
+  desiredWeight       Float
+  workoutsPerWeek     WorkoutsPerWeek
+  dietType            DietType
+  breakFastTime       String
+  lunchTime           String
+  dinnerTime          String
+  goal                Goal
+  weightChangePerWeek Float
+  desiredOutcome      DesiredOutcome
+  mainChallenge       MainChallenge
+  globalStatus        GlobalStatus    @default(ACTIVE)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  HealthPlan          HealthPlan?
+}
+
+model HealthPlan {
+  id                 String          @id @default(uuid())
+  user               User            @relation(fields: [userId], references: [id])
+  userId             String
+  healthPlanformId   String?         @unique
+  healthPlanform     HealthPlanForm? @relation(fields: [healthPlanformId], references: [id])
+  dailyCalories      Float
+  dailyCarbohydrates Float
+  dailyProtenis      Float
+  dailyFats          Float
+  globalStatus       GlobalStatus    @default(ACTIVE)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model Meal {
+  id               String       @id @default(uuid())
+  user             User?        @relation(fields: [userId], references: [id])
+  userId           String?
+  imageKey         String
+  nutrionalTable   Json?
+  questions        Json[]
+  name             String?
+  ubication        String?
+  isAIAnalysisDone Boolean?
+  globalStatus     GlobalStatus @default(ACTIVE)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+enum GlobalStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
+  ARCHIVED
+}
