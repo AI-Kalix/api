@@ -154,16 +154,54 @@ export class MealService extends Service {
     userId: string,
     answers?: QuestionDto[],
   ): Promise<AIResponseDto> {
-    const nutritionalTable = {
-      name: 'KFC',
-      calories: 250,
-    };
+    if (answers && answers.length > 0) {
+      const nutritionalTable = {
+        name: 'KFC',
+        calories: 250,
+      };
 
-    const response: AIResponseDto = {
-      type: WebhookType.SUCCESS,
-      data: nutritionalTable,
-    };
+      const response: AIResponseDto = {
+        type: WebhookType.SUCCESS,
+        data: nutritionalTable,
+      };
+      return response;
+    }
 
-    return response;
+    const canGenerateDirectly = this.shouldSimulateDirectSuccess();
+
+    if (canGenerateDirectly) {
+      const nutritionalTable = {
+        name: 'KFC',
+        calories: 250,
+      };
+
+      const response: AIResponseDto = {
+        type: WebhookType.SUCCESS,
+        data: nutritionalTable,
+      };
+      return response;
+    }
+
+    const questions: QuestionDto[] = [
+      {
+        question: '¿Cuánta carne contiene el plato?',
+        options: ['Nada', 'Poca', 'Moderada', 'Mucha'],
+      },
+      {
+        question: '¿Contiene ingredientes fritos?',
+        options: ['Sí', 'No', 'No estoy seguro'],
+      },
+    ];
+
+    return {
+      type: WebhookType.DOUBTS,
+      data: questions,
+    };
+  }
+
+  private analysisCounter = 0;
+  private shouldSimulateDirectSuccess(): boolean {
+    this.analysisCounter++;
+    return this.analysisCounter % 2 === 0; 
   }
 }
