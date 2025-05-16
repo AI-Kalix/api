@@ -213,6 +213,7 @@ export class AuthService extends Service {
       };
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
+      this.logger.error(error);
     }
   }
 }
