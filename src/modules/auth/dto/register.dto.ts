@@ -4,7 +4,6 @@ import {
   MinLength,
   IsEnum,
   IsOptional,
-  MaxLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -40,5 +39,4 @@ export class RegisterDto {
   @IsEnum(Role)
   @IsOptional()
   role?: Role;
-
 }

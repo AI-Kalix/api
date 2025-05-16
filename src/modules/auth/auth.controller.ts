@@ -93,7 +93,7 @@ export class AuthController {
     example: '1234567890',
   })
   async googleLogin(@Query('deviceId') deviceId: string) {
-    return { msg: 'Google authentication' };
+    return { msg: 'Google authentication' + deviceId };
   }
 
   @Get('google/redirect')

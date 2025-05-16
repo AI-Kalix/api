@@ -3,7 +3,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import {
   StoplightElements,
   StoplightElementsOptions,
-} from './StoplightElements';
+} from './StopLightElements';
 
 export function setupDocs(app: INestApplication) {
   const config = new DocumentBuilder()

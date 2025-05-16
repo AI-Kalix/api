@@ -133,7 +133,7 @@ export class MealService extends Service {
   }
 
   update(mealId: string, updateMealDto: UpdateMealDto) {
-    return `This action updates a #${mealId} meal`;
+    return `This action updates a #${mealId} meal + ${updateMealDto}`;
   }
 
   async remove(mealId: string, user: User): Promise<Meal> {
@@ -202,6 +202,6 @@ export class MealService extends Service {
   private analysisCounter = 0;
   private shouldSimulateDirectSuccess(): boolean {
     this.analysisCounter++;
-    return this.analysisCounter % 2 === 0; 
+    return this.analysisCounter % 2 === 0;
   }
 }
