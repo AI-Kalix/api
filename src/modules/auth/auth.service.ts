@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Service } from 'src/service';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 
 export interface SocialMediaUser {
   email: string;
@@ -51,11 +51,17 @@ export class AuthService extends Service {
       throw new UnauthorizedException('Invalid Credentials');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+    const newUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
 
     return {
-      token: this.jwtService.sign(payload),
-      user: user,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      newUser,
     };
   }
 
@@ -65,7 +71,11 @@ export class AuthService extends Service {
     });
   }
 
-  async clientAuth(deviceId: string) {
+  async clientAuth(deviceId: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user?: User;
+  }> {
     let user = await this.prisma.user.findUnique({
       where: { deviceId },
     });
@@ -75,25 +85,26 @@ export class AuthService extends Service {
         data: { deviceId },
       });
 
-      const payload = {
-        sub: user.id,
-        email: user.deviceId,
-        role: user.role,
-      };
+      const tokens = await this.generateTokens(
+        user.id,
+        user.deviceId,
+        user.role,
+      );
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
 
       return {
-        token: this.jwtService.sign(payload),
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
         user,
       };
     }
-    const payload = {
-      sub: user.id,
-      email: user.deviceId,
-      role: user.role,
-    };
+
+    const tokens = await this.generateTokens(user.id, user.deviceId, user.role);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
-      token: this.jwtService.sign(payload),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 
@@ -130,20 +141,78 @@ export class AuthService extends Service {
     });
   }
 
-  async socialMediaUserGenerateJwt(user: User) {
+  async socialMediaUserGenerateJwt(user: User): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: User;
+  }> {
     const existingUser = await this.prisma.user.findUnique({
       where: { id: user.id },
     });
 
-    const payload = {
-      sub: existingUser.id,
-      email: existingUser.email,
-      role: existingUser.role,
-    };
+    if (!existingUser) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const tokens = await this.generateTokens(
+      existingUser.id,
+      existingUser.email,
+      existingUser.role,
+    );
+
+    await this.updateRefreshToken(existingUser.id, tokens.refreshToken);
 
     return {
-      token: this.jwtService.sign(payload),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
       user: existingUser,
     };
+  }
+
+  private async generateTokens(userId: string, email: string, role: Role) {
+    const payload = { sub: userId, email, role };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, { expiresIn: '15m' }),
+      this.jwtService.signAsync(payload, { expiresIn: '7d' }),
+    ]);
+
+    return { accessToken, refreshToken };
+  }
+
+  private async updateRefreshToken(userId: string, refreshToken: string) {
+    const hashed = await bcrypt.hash(refreshToken, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashed },
+    });
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken);
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+
+      if (!user || !user.refreshToken) {
+        throw new UnauthorizedException('Access Denied');
+      }
+
+      const isMatch = await bcrypt.compare(refreshToken, user.refreshToken);
+      if (!isMatch) {
+        throw new UnauthorizedException('Access Denied');
+      }
+
+      const tokens = await this.generateTokens(user.id, user.email, user.role);
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }

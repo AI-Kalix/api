@@ -7,7 +7,7 @@ import {
   IsNumber,
   ValidateNested,
 } from 'class-validator';
-import { HealthPlanFormDto } from 'src/modules/auth/dto/healthPlanFormDto.dto';
+import { HealthPlanFormDto } from 'src/modules/healthplan/dto/healthPlanFormDto.dto';
 import { Type } from 'class-transformer';
 
 export class GenerateInitialHealthPlanDto {

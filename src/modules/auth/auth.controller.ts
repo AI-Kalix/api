@@ -19,6 +19,7 @@ import {
   ApiExtraModels,
   ApiHeader,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -32,9 +33,13 @@ import {
   INVALID_CREDENTIALS_401,
   LOGIN_RESPONSE_200,
   ME_200,
+  REFRES_TOKEN_RESPONSE_ACCESS_DENIED,
+  REFRESH_TOKEN_RESPONSE_201,
+  REFRESH_TOKEN_RESPONSE_INVALID,
   REGISTER_USER_200,
   UNAUTHORIZEDEXCEPTION_RESPONSE_401,
 } from './docs/authResponses';
+import { RefreshTokenDto } from './dto/refreshTokenDto';
 
 @ApiTags('Auth')
 @ApiHeader({
@@ -80,6 +85,13 @@ export class AuthController {
     description: 'Unauthorized',
     example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
   })
+  @ApiQuery({
+    name: 'deviceId',
+    required: true,
+    description: 'Device ID',
+    type: String,
+    example: '1234567890',
+  })
   async googleLogin(@Query('deviceId') deviceId: string) {
     return { msg: 'Google authentication' };
   }
@@ -90,6 +102,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Google callback' })
   @ApiResponse({
     status: 200,
+    description: 'successful registration with google',
     example: GOOGLE_CALLBACK_RESPONSE_200,
   })
   async googleCallback(@Req() req) {
@@ -103,11 +116,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Register user' })
   @ApiResponse({
     status: 401,
-    description: 'No autorizado',
+    description: 'Unauthorized',
     example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
   })
   @ApiResponse({
     status: 200,
+    description: 'User registered successfully',
     example: REGISTER_USER_200,
   })
   async register(@Body() registerDto: RegisterDto, @ActiveUser() user: User) {
@@ -120,10 +134,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({
     status: 401,
+    description: 'Invalid Credentials',
     example: INVALID_CREDENTIALS_401,
   })
   @ApiResponse({
     status: 200,
+    description: 'User logged in successfully',
     example: LOGIN_RESPONSE_200,
   })
   async login(@Body() loginDto: LoginDto) {
@@ -136,6 +152,7 @@ export class AuthController {
   @ApiOperation({ summary: 'get auth user' })
   @ApiResponse({
     status: 200,
+    description: 'User details retrieved successfully',
     example: ME_200,
   })
   @ApiResponse({
@@ -145,5 +162,27 @@ export class AuthController {
   })
   async me(@ActiveUser() user: User) {
     return this.authService.getMe(user.id);
+  }
+
+  @Post('refresh')
+  @ResponseMessage('Access token refreshed successfully')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({
+    status: 201,
+    description: 'Access token refreshed successfully',
+    example: REFRESH_TOKEN_RESPONSE_201,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Invalid refresh token',
+    example: REFRESH_TOKEN_RESPONSE_INVALID,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Access denied',
+    example: REFRES_TOKEN_RESPONSE_ACCESS_DENIED,
+  })
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshAccessToken(refreshTokenDto.refreshToken);
   }
 }

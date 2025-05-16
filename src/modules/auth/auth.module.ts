@@ -17,7 +17,6 @@ import { HealthplanService } from '../healthplan/healthplan.service';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('jwt.secret'),
-        signOptions: { expiresIn: '1d' },
       }),
     }),
   ],

@@ -10,16 +10,22 @@ import {
 import { HealthplanService } from './healthplan.service';
 import { CreateHealthplanDto } from './dto/create-healthplan.dto';
 import { UpdateHealthplanDto } from './dto/update-healthplan.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../auth/decorators/auth.decorator';
 import {
   ALREADY_DID_INITIAL_HEALTH_FORM_401,
   INITIAL_HEALTH_PLAN_201,
 } from '../auth/docs/authResponses';
-import { GenerateInitialHealthPlanDto } from './dto/generateInitialHealthPlan.dto'; 
+import { GenerateInitialHealthPlanDto } from './dto/generateInitialHealthPlan.dto';
 import { ActiveUser } from '../auth/decorators/session.decorator';
 import { Role, User } from '@prisma/client';
+import { ResponseMessage } from 'src/decorators/responseMessage.decorator';
 
+@ApiTags("healthplan (still doesn't work)")
+@ApiHeader({
+  name: 'Healthplan (no está en funcionamiento)',
+  description: 'Heltplan Endpoints',
+})
 @Controller('healthplan')
 export class HealthplanController {
   constructor(private readonly healthplanService: HealthplanService) {}
@@ -32,12 +38,15 @@ export class HealthplanController {
   @Post('generate-initialPlan')
   @Auth([Role.USER])
   @ApiOperation({ summary: 'Generate Initial Plan' })
+  @ResponseMessage('Initial health plan generated successfully')
   @ApiResponse({
     status: 201,
+    description: 'Initial health plan generated successfully',
     example: INITIAL_HEALTH_PLAN_201,
   })
   @ApiResponse({
     status: 401,
+    description: 'User has already completed the initial health form',
     example: ALREADY_DID_INITIAL_HEALTH_FORM_401,
   })
   async generatePlan(

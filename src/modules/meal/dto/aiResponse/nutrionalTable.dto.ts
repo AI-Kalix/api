@@ -1,8 +1,20 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, IsPositive } from 'class-validator';
 
 export class NutrionalTableDto {
+  @ApiProperty({
+    description: 'Meal name',
+    example: 'KFC',
+    required: true,
+  })
   @IsString()
   name: string;
+
+  @ApiProperty({
+    description: 'Calories in the meal',
+    example: 250,
+    required: true,
+  })
   @IsNumber()
   @IsPositive()
   calories: number;
@@ -55,4 +67,3 @@ export class NutrionalTableDto {
   // @IsPositive()
   // proteins: number;
 }
-

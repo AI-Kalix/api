@@ -1,3 +1,4 @@
+import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import {
   ValidatePolymorphicData,
@@ -7,11 +8,26 @@ import { NutrionalTableDto } from './nutrionalTable.dto';
 import { QuestionDto } from './question.dto';
 
 export class AIResponseDto {
+  @ApiProperty({
+    enum: WebhookType,
+    description: 'Answer type',
+  })
   @IsEnum(WebhookType)
   type: WebhookType;
 
+  @ApiProperty({
+    oneOf: [
+      {
+        $ref: getSchemaPath(QuestionDto),
+      },
+      {
+        $ref: getSchemaPath(NutrionalTableDto),
+      },
+    ],
+    description: 'Data of the answer',
+  })
   @ValidatePolymorphicData({
-    message: 'La propiedad "data" no corresponde al tipo declarado en "type"',
+    message: 'Invalid data type',
   })
   data: QuestionDto[] | NutrionalTableDto;
 }

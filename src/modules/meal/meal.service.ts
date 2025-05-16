@@ -45,10 +45,7 @@ export class MealService extends Service {
         user.id,
         answers,
       );
-
-
       if (aiResponse.type === WebhookType.SUCCESS) {
-        console.log('Entro a la condición que dice que es un nutrionalDto');
         const table = aiResponse.data as NutrionalTableDto;
         const updated = await this.prisma.meal.update({
           where: { id: mealId },
@@ -110,7 +107,9 @@ export class MealService extends Service {
       take: limit,
     });
 
-    const totalMeals = await this.prisma.meal.count({});
+    const totalMeals = await this.prisma.meal.count({
+      where: { userId: user.id },
+    });
 
     return {
       meals: meals,
@@ -128,7 +127,7 @@ export class MealService extends Service {
       throw new NotFoundException("This meal doesn't exist");
     }
     if (meal.userId !== user.id) {
-      throw new UnauthorizedException("You can't access to this meal");
+      throw new UnauthorizedException("You can't access this meal");
     }
     return meal;
   }
@@ -150,13 +149,11 @@ export class MealService extends Service {
     return await this.prisma.meal.delete({ where: { id: mealId } });
   }
 
-
   async aiAnalysis(
     resource: string,
     userId: string,
     answers?: QuestionDto[],
   ): Promise<AIResponseDto> {
-   
     const nutritionalTable = {
       name: 'KFC',
       calories: 250,
@@ -164,7 +161,7 @@ export class MealService extends Service {
 
     const response: AIResponseDto = {
       type: WebhookType.SUCCESS,
-      data: nutritionalTable, 
+      data: nutritionalTable,
     };
 
     return response;
