@@ -1,10 +1,10 @@
-import { Type } from "class-transformer";
-import { IsArray, IsOptional, IsString, ValidateNested } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { QuestionDto } from "./aiResponse/question.dto";
+// create-meal.dto.ts
+import { Type } from 'class-transformer';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { QuestionDto } from './aiResponse/question.dto';
 
 export class CreateMealDto {
-
   @ApiProperty({
     description: 'Optional ID of the meal, if it already exists',
     type: String,
@@ -16,7 +16,7 @@ export class CreateMealDto {
 
   @ApiProperty({
     description: 'Optional array of questions related to the meal',
-    type: [QuestionDto],
+    type: () => [QuestionDto],
     required: false,
   })
   @IsOptional()
@@ -25,4 +25,3 @@ export class CreateMealDto {
   @Type(() => QuestionDto)
   data?: QuestionDto[];
 }
-

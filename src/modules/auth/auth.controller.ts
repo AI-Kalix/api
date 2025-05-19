@@ -22,6 +22,7 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { ClientDto } from './dto/client.dto';
 import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
@@ -40,13 +41,25 @@ import {
   UNAUTHORIZEDEXCEPTION_RESPONSE_401,
 } from './docs/authResponses';
 import { RefreshTokenDto } from './dto/refreshTokenDto';
+import { ApiResponseDto } from 'src/common/apiResponse.dto';
+import { AuthResponseV1Dto } from './dto/authApiResponse/authv1.response.dto';
+import { AuthResponseV2Dto } from './dto/authApiResponse/authv2.response.dto';
+import { UserDto } from './dto/authApiResponse/user.dto';
+import { ApiErrorResponseDto } from 'src/common/apiErrorResponse.dto';
 
 @ApiTags('Auth')
 @ApiHeader({
   name: 'Authorization',
   description: 'Bearer token',
 })
-@ApiExtraModels(ClientDto, RegisterDto, LoginDto)
+@ApiExtraModels(
+  ClientDto,
+  RegisterDto,
+  LoginDto,
+  ApiResponseDto,
+  AuthResponseV1Dto,
+  AuthResponseV2Dto,
+)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -59,6 +72,32 @@ export class AuthController {
     description: 'Token generated successfully',
     content: {
       'application/json': {
+        schema: {
+          oneOf: [
+            {
+              title: 'AuthResponseWithUser',
+              allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                  properties: {
+                    data: { $ref: getSchemaPath(AuthResponseV1Dto) },
+                  },
+                },
+              ],
+            },
+            {
+              title: 'AuthResponseWithoutUser',
+              allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                  properties: {
+                    data: { $ref: getSchemaPath(AuthResponseV2Dto) },
+                  },
+                },
+              ],
+            },
+          ],
+        },
         examples: {
           v1: {
             summary: 'v1',
@@ -79,7 +118,7 @@ export class AuthController {
   @Get('google/login')
   @UseGuards(GoogleLoginGuard)
   @Auth([Role.USER])
-  @ApiOperation({ summary: 'Google auth' })
+  @ApiOperation({ summary: 'Google auth (ignore)' })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
@@ -93,13 +132,13 @@ export class AuthController {
     example: '1234567890',
   })
   async googleLogin(@Query('deviceId') deviceId: string) {
-    return { msg: 'Google authentication' };
+    return { msg: 'Google authentication' + deviceId };
   }
 
   @Get('google/redirect')
   @UseGuards(GoogleAuthGuard)
   @ResponseMessage('successful registration with google')
-  @ApiOperation({ summary: 'Google callback' })
+  @ApiOperation({ summary: 'Google callback (ignore)' })
   @ApiResponse({
     status: 200,
     description: 'successful registration with google',
@@ -111,9 +150,9 @@ export class AuthController {
   }
 
   @Post('register')
-  @ResponseMessage('User registered successfully')
+  @ResponseMessage('User registered successfully (ignore)')
   @Auth([Role.USER])
-  @ApiOperation({ summary: 'Register user' })
+  @ApiOperation({ summary: 'Register user (ignore)' })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
@@ -129,9 +168,9 @@ export class AuthController {
   }
 
   @Post('login')
-  @ResponseMessage('User logged in successfully')
+  @ResponseMessage('User logged in successfully ')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Login user' })
+  @ApiOperation({ summary: 'Login user (ignore)' })
   @ApiResponse({
     status: 401,
     description: 'Invalid Credentials',
@@ -148,17 +187,36 @@ export class AuthController {
 
   @Get('me')
   @Auth([Role.ADMIN, Role.USER])
-  @ResponseMessage('User details retrieved successfully')
+  @ResponseMessage('User details retrieved successfully (ignore)')
   @ApiOperation({ summary: 'get auth user' })
   @ApiResponse({
     status: 200,
     description: 'User details retrieved successfully',
-    example: ME_200,
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [
+            { $ref: getSchemaPath(ApiResponseDto) },
+            {
+              properties: {
+                data: { $ref: getSchemaPath(UserDto) },
+              },
+            },
+          ],
+        },
+        example: ME_200,
+      },
+    },
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
-    example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+      },
+    },
   })
   async me(@ActiveUser() user: User) {
     return this.authService.getMe(user.id);

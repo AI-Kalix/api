@@ -29,7 +29,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ) {
     const deviceId = req.query.state as string;
-    console.log(req.query.state);
     if (!deviceId) {
       return done(
         new UnauthorizedException('Missing deviceId in OAuth state'),

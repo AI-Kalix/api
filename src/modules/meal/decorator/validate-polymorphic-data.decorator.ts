@@ -51,7 +51,7 @@ class PolymorphicDataValidator implements ValidatorConstraintInterface {
 }
 
 export function ValidatePolymorphicData(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'validatePolymorphicData',
       target: object.constructor,

@@ -8,7 +8,6 @@ import {
   Delete,
 } from '@nestjs/common';
 import { HealthplanService } from './healthplan.service';
-import { CreateHealthplanDto } from './dto/create-healthplan.dto';
 import { UpdateHealthplanDto } from './dto/update-healthplan.dto';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../auth/decorators/auth.decorator';
@@ -21,7 +20,7 @@ import { ActiveUser } from '../auth/decorators/session.decorator';
 import { Role, User } from '@prisma/client';
 import { ResponseMessage } from 'src/decorators/responseMessage.decorator';
 
-@ApiTags("healthplan (still doesn't work)")
+@ApiTags('healthplan (ignore completly)')
 @ApiHeader({
   name: 'Healthplan (no está en funcionamiento)',
   description: 'Heltplan Endpoints',

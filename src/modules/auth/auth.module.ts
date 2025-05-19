@@ -7,8 +7,6 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PrismaService } from 'src/core/prisma.service';
 import { GoogleStrategy } from './strategies/google.strategy';
-import { HealthplanService } from '../healthplan/healthplan.service';
-
 @Module({
   imports: [
     PassportModule,

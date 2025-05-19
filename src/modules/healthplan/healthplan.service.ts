@@ -104,6 +104,10 @@ export class HealthplanService extends Service {
       },
     });
 
+    this.logger.log(
+      `UserDetail created for user ${userFind.id} with ID ${userDetail.id}`,
+    );
+
     const healthForm = await this.prisma.healthPlanForm.create({
       data: {
         userId: userFind.id,
@@ -132,7 +136,7 @@ export class HealthplanService extends Service {
   }
 
   update(id: number, updateHealthplanDto: UpdateHealthplanDto) {
-    return `This action updates a #${id} healthplan`;
+    return `This action updates a #${id} healthplan` + updateHealthplanDto;
   }
 
   remove(id: number) {
