@@ -43,6 +43,7 @@ import {
   POST_MEAL_RESPONSE_SUCCESS_201_V2,
 } from './docs/mealResponses';
 import { UNAUTHORIZEDEXCEPTION_RESPONSE_401 } from '../auth/docs/authResponses';
+import { QuestionDto } from './dto/aiResponse/question.dto';
 
 @ApiTags('Meal')
 @ApiHeader({
@@ -54,7 +55,7 @@ import { UNAUTHORIZEDEXCEPTION_RESPONSE_401 } from '../auth/docs/authResponses';
   description: 'Unauthorized',
   example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
 })
-@ApiExtraModels(CreateMealDto, UpdateMealDto, PaginationDto)
+@ApiExtraModels(CreateMealDto, UpdateMealDto, PaginationDto, QuestionDto)
 @Controller('meal')
 export class MealController {
   constructor(private readonly mealService: MealService) {}
@@ -64,7 +65,7 @@ export class MealController {
   @UseInterceptors(FileInterceptor('file'), MealImageUrlInterceptor)
   @ResponseMessage('Meal created successfully')
   @ApiOperation({
-    summary: 'Create or update a meal using image and/or AI answers',
+    summary: 'Meal AI Analysis',
     description: `
   **This endpoint supports two flows:**
   
@@ -130,21 +131,20 @@ export class MealController {
   @ApiExtraModels(CreateMealDto)
   @ApiBody({
     schema: {
-      allOf: [
-        { $ref: getSchemaPath(CreateMealDto) },
-        {
-          type: 'object',
-          properties: {
-            file: {
-              type: 'string',
-              format: 'binary',
-              description:
-                'Optional image file of the meal (only for first call)',
-            },
-          },
-          required: [],
+      type: 'object',
+      properties: {
+        mealId: { type: 'string', description: 'Optional ID of the meal' },
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(QuestionDto) },
         },
-      ],
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Optional image file of the meal (only for first call)',
+        },
+      },
+      required: [],
     },
   })
   @ApiResponse({

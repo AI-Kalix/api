@@ -1,3 +1,4 @@
+// create-meal.dto.ts
 import { Type } from 'class-transformer';
 import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -15,7 +16,7 @@ export class CreateMealDto {
 
   @ApiProperty({
     description: 'Optional array of questions related to the meal',
-    type: [QuestionDto],
+    type: () => [QuestionDto],
     required: false,
   })
   @IsOptional()

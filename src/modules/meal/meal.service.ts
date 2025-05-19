@@ -14,10 +14,14 @@ import { NutrionalTableDto } from './dto/aiResponse/nutrionalTable.dto';
 import { QuestionDto } from './dto/aiResponse/question.dto';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { WebhookType } from './decorator/validate-polymorphic-data.decorator';
+import { AiAnalysisService } from './aiAnalysis/aiAnalysis.service';
 
 @Injectable()
 export class MealService extends Service {
-  constructor(private s3Service: S3Service) {
+  constructor(
+    private s3Service: S3Service,
+    private aiAnalysisService: AiAnalysisService,
+  ) {
     super(MealService.name);
   }
   async create(
@@ -40,7 +44,7 @@ export class MealService extends Service {
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
 
-      const aiResponse = await this.aiAnalysis(
+      const aiResponse = await this.aiAnalysisOriginal(
         existing.imageKey,
         user.id,
         answers,
@@ -74,7 +78,7 @@ export class MealService extends Service {
       },
     });
 
-    const aiResponse = await this.aiAnalysis(imageUrl, user.id);
+    const aiResponse = await this.aiAnalysisOriginal(imageUrl, user.id);
 
     if (aiResponse.data instanceof Array) {
       const questions = aiResponse.data as QuestionDto[];
@@ -203,5 +207,19 @@ export class MealService extends Service {
   private shouldSimulateDirectSuccess(): boolean {
     this.analysisCounter++;
     return this.analysisCounter % 2 === 0;
+  }
+
+  async aiAnalysisOriginal(
+    resource: string,
+    userId: string,
+    answers?: QuestionDto[],
+  ) {
+    const response = await this.aiAnalysisService.analyze({
+      resource,
+      userId,
+      answers: answers ?? [],
+    });
+
+    return response;
   }
 }

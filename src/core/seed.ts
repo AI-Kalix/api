@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const plainPassword = '12345678'; // contraseña en texto plano
-  const hashedPassword = await bcrypt.hash(plainPassword, 10); // hasheado con 10 salt rounds
+  const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
   await prisma.user.create({
     data: {

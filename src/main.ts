@@ -27,7 +27,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(app.get(ResponseInterceptor));
-  setupDocs(app);
+  await setupDocs(app);
   app.useLogger(app.get(Logger));
   await app.listen(port);
 }
