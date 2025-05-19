@@ -44,7 +44,7 @@ export class MealService extends Service {
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
 
-      const aiResponse = await this.aiAnalysisOriginal(
+      const aiResponse = await this.aiAnalysis(
         existing.imageKey,
         user.id,
         answers,
@@ -78,7 +78,7 @@ export class MealService extends Service {
       },
     });
 
-    const aiResponse = await this.aiAnalysisOriginal(imageUrl, user.id);
+    const aiResponse = await this.aiAnalysis(imageUrl, user.id);
 
     if (aiResponse.data instanceof Array) {
       const questions = aiResponse.data as QuestionDto[];
@@ -86,7 +86,7 @@ export class MealService extends Service {
         where: { id: meal.id },
         data: { questions: JSON.parse(JSON.stringify(questions)) },
       });
-      return { questions, mealId: meal.id };
+      return { questions, id: meal.id };
     }
 
     const table = aiResponse.data as NutrionalTableDto;

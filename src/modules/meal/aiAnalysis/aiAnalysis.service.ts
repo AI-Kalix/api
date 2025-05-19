@@ -9,8 +9,7 @@ export class AiAnalysisService {
   constructor(private httpService: HttpService) {}
 
   async analyze(data: AnalyzeMealDto): Promise<AIResponseDto> {
-    const url =
-      'https://latitude-issued-dog-rugs.trycloudflare.com/api/analysis';
+    const url = 'url/ia';
 
     try {
       const response = await firstValueFrom(

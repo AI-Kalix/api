@@ -16,11 +16,16 @@ export function setupDocs(app: INestApplication): void {
   app.use(
     '/docs',
     apiReference({
-      spec: {
-        content: document,
-      },
+      spec: { content: document },
       theme: 'dark',
       hideExport: true,
+      branding: {
+        logo: {
+          altText: 'Kalix Docs',
+          url: '/path-to-your-logo.svg',
+        },
+        companyName: 'Kalix API Docs',
+      },
     }),
   );
 }
