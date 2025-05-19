@@ -43,6 +43,12 @@ import {
   POST_MEAL_RESPONSE_SUCCESS_201_V2,
 } from './docs/mealResponses';
 import { UNAUTHORIZEDEXCEPTION_RESPONSE_401 } from '../auth/docs/authResponses';
+import { QuestionDto } from './dto/aiResponse/question.dto';
+import { MealResponseDto } from './dto/mealApiResponses/meal.response.dto';
+import { ApiResponseDto } from 'src/common/apiResponse.dto';
+import { AiQuestionResponseDto } from './dto/mealApiResponses/aiQuestionResponse.dto';
+import { ApiErrorResponseDto } from 'src/common/apiErrorResponse.dto';
+import { MealPaginatedResponseDto } from './dto/mealApiResponses/mealPaginatedResponse.dto';
 
 @ApiTags('Meal')
 @ApiHeader({
@@ -54,7 +60,17 @@ import { UNAUTHORIZEDEXCEPTION_RESPONSE_401 } from '../auth/docs/authResponses';
   description: 'Unauthorized',
   example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
 })
-@ApiExtraModels(CreateMealDto, UpdateMealDto, PaginationDto)
+@ApiExtraModels(
+  CreateMealDto,
+  UpdateMealDto,
+  PaginationDto,
+  QuestionDto,
+  ApiResponseDto,
+  MealResponseDto,
+  AiQuestionResponseDto,
+  ApiErrorResponseDto,
+  MealPaginatedResponseDto,
+)
 @Controller('meal')
 export class MealController {
   constructor(private readonly mealService: MealService) {}
@@ -64,7 +80,7 @@ export class MealController {
   @UseInterceptors(FileInterceptor('file'), MealImageUrlInterceptor)
   @ResponseMessage('Meal created successfully')
   @ApiOperation({
-    summary: 'Create or update a meal using image and/or AI answers',
+    summary: 'Meal AI Analysis',
     description: `
   **This endpoint supports two flows:**
   
@@ -89,7 +105,7 @@ export class MealController {
         "options": ["Alta", "Media", "Baja"]
       }
     ],
-    "mealId": "7ab123d1-fd44-4b87-bb47-43f38fa83e89"
+    "id": "7ab123d1-fd44-4b87-bb47-43f38fa83e89"
   }
   \`\`\`
   
@@ -105,7 +121,7 @@ export class MealController {
   
   \`\`\`json
   {
-    "mealId": "7ab123d1-fd44-4b87-bb47-43f38fa83e89",
+    "id": "7ab123d1-fd44-4b87-bb47-43f38fa83e89",
     "data": [
       {
         "question": "What ingredients does the dish have?",
@@ -130,60 +146,117 @@ export class MealController {
   @ApiExtraModels(CreateMealDto)
   @ApiBody({
     schema: {
-      allOf: [
-        { $ref: getSchemaPath(CreateMealDto) },
-        {
-          type: 'object',
-          properties: {
-            file: {
-              type: 'string',
-              format: 'binary',
-              description:
-                'Optional image file of the meal (only for first call)',
-            },
-          },
-          required: [],
+      type: 'object',
+      properties: {
+        mealId: { type: 'string', description: 'Optional ID of the meal' },
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(QuestionDto) },
         },
-      ],
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Optional image file of the meal (only for first call)',
+        },
+      },
+      required: [],
     },
   })
   @ApiResponse({
     status: 201,
     description: 'Meal created successfully or updated after AI analysis',
-    examples: {
-      createSuccess: {
-        summary: 'Meal created with full AI analysis (no questions)',
-        value: POST_MEAL_RESPONSE_SUCCESS_201,
+    content: {
+      'application/json': {
+        schema: {
+          oneOf: [
+            {
+              title: 'MealResponse',
+              allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                  properties: {
+                    data: { $ref: getSchemaPath(MealResponseDto) },
+                  },
+                },
+              ],
+            },
+            {
+              title: 'AiQuestionsResponse',
+              allOf: [
+                { $ref: getSchemaPath(ApiResponseDto) },
+                {
+                  properties: {
+                    data: { $ref: getSchemaPath(AiQuestionResponseDto) },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        examples: {
+          createSuccess: {
+            summary: 'Meal created with full AI analysis (no questions)',
+            value: POST_MEAL_RESPONSE_SUCCESS_201,
+          },
+          createWithQuestions: {
+            summary: 'Meal created, questions returned by AI',
+            value: POST_MEAL_RESPONSE_QUESTION_201,
+          },
+          createWithSuccessV2: {
+            summary: 'Alternative response format with enriched data',
+            value: POST_MEAL_RESPONSE_SUCCESS_201_V2,
+          },
+        },
       },
-      createWithQuestions: {
-        summary: 'Meal created, questions returned by AI',
-        value: POST_MEAL_RESPONSE_QUESTION_201,
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'No answers provided for AI follow-up analysis',
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
+        },
+        example: NO_ANSWER_PROVIDED_400,
       },
-      createWithSuccessV2: {
-        summary: 'Alternative response format with enriched data',
-        value: POST_MEAL_RESPONSE_SUCCESS_201_V2,
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: "You can't access this meal",
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
+        },
+        example: CANT_ACCESS_MEAL_401,
       },
     },
   })
   @ApiResponse({
     status: 404,
     description: 'Meal not found',
-    example: MEAL_DOSENT_EXIST_404,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'No answers provided for AI follow-up analysis',
-    example: NO_ANSWER_PROVIDED_400,
-  })
-  @ApiResponse({
-    status: 400,
-    description: "You can't access this meal",
-    example: CANT_ACCESS_MEAL_401,
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
+        },
+        example: MEAL_DOSENT_EXIST_404,
+      },
+    },
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
-    example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
+        },
+        example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+      },
+    },
   })
   async create(
     @ActiveUser() user: User,
@@ -200,17 +273,40 @@ export class MealController {
   @ApiResponse({
     status: 200,
     description: 'Meals obtained successfully',
-    example: GET_ALL_MEALS_BY_USERID_200,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'No meals found',
-    example: GET_ALL_MEALS_BY_USERID_200_EMPTY,
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [
+            { $ref: getSchemaPath(ApiResponseDto) },
+            {
+              properties: {
+                data: { $ref: getSchemaPath(MealPaginatedResponseDto) },
+              },
+            },
+          ],
+        },
+        examples: {
+          hasMeals: {
+            summary: 'User has meals',
+            value: GET_ALL_MEALS_BY_USERID_200,
+          },
+          emptyMeals: {
+            summary: 'No meals found',
+            value: GET_ALL_MEALS_BY_USERID_200_EMPTY,
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
-    example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+      },
+    },
   })
   async findAll(
     @ActiveUser() user: User,
@@ -227,22 +323,51 @@ export class MealController {
   @ApiResponse({
     status: 200,
     description: 'Meal obtained successfully',
-    example: GET_MEAL_BY_ID_200,
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [
+            { $ref: getSchemaPath(ApiResponseDto) },
+            {
+              properties: {
+                data: { $ref: getSchemaPath(MealResponseDto) },
+              },
+            },
+          ],
+        },
+        example: GET_MEAL_BY_ID_200,
+      },
+    },
   })
   @ApiResponse({
     status: 400,
     description: "You can't access this meal",
-    example: CANT_ACCESS_MEAL_401,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: CANT_ACCESS_MEAL_401,
+      },
+    },
   })
   @ApiResponse({
     status: 404,
     description: 'Meal not found',
-    example: MEAL_DOSENT_EXIST_404,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: MEAL_DOSENT_EXIST_404,
+      },
+    },
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
-    example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+      },
+    },
   })
   async findOne(@Param('mealId') mealId: string, @ActiveUser() user: User) {
     return this.mealService.findOne(mealId, user);
@@ -266,22 +391,51 @@ export class MealController {
   @ApiResponse({
     status: 200,
     description: 'Meal deleted successfully',
-    example: DELETE_MEAL_200,
+    content: {
+      'application/json': {
+        schema: {
+          allOf: [
+            { $ref: getSchemaPath(ApiResponseDto) },
+            {
+              properties: {
+                data: { $ref: getSchemaPath(MealResponseDto) },
+              },
+            },
+          ],
+        },
+        example: DELETE_MEAL_200,
+      },
+    },
   })
   @ApiResponse({
     status: 401,
     description: "You can't access this meal",
-    example: CANT_ACCESS_MEAL_401,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: CANT_ACCESS_MEAL_401,
+      },
+    },
   })
   @ApiResponse({
     status: 404,
     description: "This meal doesn't exist",
-    example: MEAL_DOSENT_EXIST_404,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: MEAL_DOSENT_EXIST_404,
+      },
+    },
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
-    example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+      },
+    },
   })
   async remove(@Param('mealId') mealId: string, @ActiveUser() user: User) {
     return this.mealService.remove(mealId, user);

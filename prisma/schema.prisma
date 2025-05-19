@@ -139,7 +139,7 @@ model Meal {
   nutrionalTable   Json?
   questions        Json[]
   name             String?
-  ubication        String?
+  location         String?
   isAIAnalysisDone Boolean?
   globalStatus     GlobalStatus @default(ACTIVE)
   createdAt        DateTime     @default(now())

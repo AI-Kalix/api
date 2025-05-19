@@ -14,10 +14,14 @@ import { NutrionalTableDto } from './dto/aiResponse/nutrionalTable.dto';
 import { QuestionDto } from './dto/aiResponse/question.dto';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { WebhookType } from './decorator/validate-polymorphic-data.decorator';
+import { AiAnalysisService } from './aiAnalysis/aiAnalysis.service';
 
 @Injectable()
 export class MealService extends Service {
-  constructor(private s3Service: S3Service) {
+  constructor(
+    private s3Service: S3Service,
+    private aiAnalysisService: AiAnalysisService,
+  ) {
     super(MealService.name);
   }
   async create(
@@ -82,7 +86,7 @@ export class MealService extends Service {
         where: { id: meal.id },
         data: { questions: JSON.parse(JSON.stringify(questions)) },
       });
-      return { questions, mealId: meal.id };
+      return { questions, id: meal.id };
     }
 
     const table = aiResponse.data as NutrionalTableDto;
@@ -203,5 +207,19 @@ export class MealService extends Service {
   private shouldSimulateDirectSuccess(): boolean {
     this.analysisCounter++;
     return this.analysisCounter % 2 === 0;
+  }
+
+  async aiAnalysisOriginal(
+    resource: string,
+    userId: string,
+    answers?: QuestionDto[],
+  ) {
+    const response = await this.aiAnalysisService.analyze({
+      resource,
+      userId,
+      answers: answers ?? [],
+    });
+
+    return response;
   }
 }

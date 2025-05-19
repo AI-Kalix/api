@@ -20,7 +20,7 @@ import { ActiveUser } from '../auth/decorators/session.decorator';
 import { Role, User } from '@prisma/client';
 import { ResponseMessage } from 'src/decorators/responseMessage.decorator';
 
-@ApiTags("healthplan (still doesn't work)")
+@ApiTags('healthplan (ignore completly)')
 @ApiHeader({
   name: 'Healthplan (no está en funcionamiento)',
   description: 'Heltplan Endpoints',

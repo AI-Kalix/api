@@ -169,6 +169,8 @@ export const ME_200 = {
     globalStatus: 'ACTIVE',
     createdAt: '2025-05-09T19:44:15.453Z',
     updatedAt: '2025-05-09T19:45:54.476Z',
+    refreshToken:
+      '$2b$10$HyNFTdMiWpUBQgHbjGzC7ut3x5SuJ.7Rqme/wLfRMsFuc5zyhQ/De',
   },
 };
 
