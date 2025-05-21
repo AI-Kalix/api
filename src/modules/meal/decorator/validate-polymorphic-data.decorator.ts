@@ -10,15 +10,16 @@ import { validateSync } from 'class-validator';
 import { QuestionDto } from '../dto/aiResponse/question.dto';
 import { NutrionalTableDto } from '../dto/aiResponse/nutrionalTable.dto';
 
-export enum WebhookType {
+export enum AIresponseType {
   SUCCESS = 'SUCCESS',
   DOUBTS = 'DOUBTS',
+  INVALID_IMAGE = 'INVALID IMAGE',
 }
 
 @ValidatorConstraint({ async: false })
 class PolymorphicDataValidator implements ValidatorConstraintInterface {
   validate(value: unknown, args: ValidationArguments) {
-    const object = args.object as { type: WebhookType };
+    const object = args.object as { type: AIresponseType };
     const { type } = object;
 
     if (typeof value !== 'object' || value === null) {
@@ -28,10 +29,10 @@ class PolymorphicDataValidator implements ValidatorConstraintInterface {
     let dtoClass;
 
     switch (type) {
-      case WebhookType.DOUBTS:
+      case AIresponseType.DOUBTS:
         dtoClass = QuestionDto;
         break;
-      case WebhookType.SUCCESS:
+      case AIresponseType.SUCCESS:
         dtoClass = NutrionalTableDto;
         break;
       default:
