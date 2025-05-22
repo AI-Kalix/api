@@ -47,9 +47,9 @@ export class MealService extends Service {
       if (!existing) throw new NotFoundException("This meal doesn't exist");
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
-
-      const aiResponse = await this.aiAnalysis(
-        existing.imageKey,
+      const existingImage = await this.s3Service.getUrl(existing.imageKey);
+      const aiResponse = await this.aiAnalysisOriginal(
+        existingImage,
         user.id,
         answers,
       );
@@ -239,11 +239,16 @@ export class MealService extends Service {
     userId: string,
     answers?: QuestionDto[],
   ) {
-    const response = await this.aiAnalysisService.analyze({
+    const body = {
       resource,
       userId,
-      answers: answers ?? [],
-    });
+    };
+
+    if (answers && answers.length > 0) {
+      body['answers'] = answers;
+    }
+
+    const response = await this.aiAnalysisService.analyze(body);
 
     return response;
   }
