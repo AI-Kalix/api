@@ -36,6 +36,7 @@ import {
   GET_ALL_MEALS_BY_USERID_200,
   GET_ALL_MEALS_BY_USERID_200_EMPTY,
   GET_MEAL_BY_ID_200,
+  INVALID_IMAGE_400,
   MEAL_DOSENT_EXIST_404,
   NO_ANSWER_PROVIDED_400,
   POST_MEAL_RESPONSE_QUESTION_201,
@@ -91,8 +92,6 @@ export class MealController {
   - The server creates a new meal and performs AI analysis.
   - If the AI detects more information is needed, it responds with:
   
-  API Response when ai needs more information:
-
   \`\`\`json
   {
     "questions": [
@@ -115,8 +114,7 @@ export class MealController {
   - Send an object with:
     - \`mealId\`: ID of the meal to update.
     - \`data: QuestionDto[]\`: Array of questions with answers.
-  - This updates the existing meal and completes the AI analysis.
-
+  
   Example of Dto that you need to send to complete the ai analysis:
   
   \`\`\`json
@@ -140,10 +138,17 @@ export class MealController {
   ---
   
   **Note:** You must provide **either** a \`file\` **or the object** \`mealId + data\`, but **not both**.
-  `,
+    `,
   })
   @ApiConsumes('multipart/form-data')
-  @ApiExtraModels(CreateMealDto)
+  @ApiExtraModels(
+    CreateMealDto,
+    ApiResponseDto,
+    ApiErrorResponseDto,
+    MealResponseDto,
+    AiQuestionResponseDto,
+    QuestionDto,
+  )
   @ApiBody({
     schema: {
       type: 'object',
@@ -212,49 +217,54 @@ export class MealController {
   })
   @ApiResponse({
     status: 400,
-    description: 'No answers provided for AI follow-up analysis',
+    description: 'Bad request - multiple causes',
     content: {
       'application/json': {
-        schema: {
-          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        examples: {
+          noAnswers: {
+            summary: 'No answers provided',
+            value: NO_ANSWER_PROVIDED_400,
+          },
+          invalidImage: {
+            summary: 'Invalid image',
+            value: INVALID_IMAGE_400,
+          },
         },
-        example: NO_ANSWER_PROVIDED_400,
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: "You can't access this meal",
-    content: {
-      'application/json': {
-        schema: {
-          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
-        },
-        example: CANT_ACCESS_MEAL_401,
-      },
-    },
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Meal not found',
-    content: {
-      'application/json': {
-        schema: {
-          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
-        },
-        example: MEAL_DOSENT_EXIST_404,
       },
     },
   })
   @ApiResponse({
     status: 401,
-    description: 'Unauthorized',
+    description: 'Unauthorized or forbidden access',
     content: {
       'application/json': {
-        schema: {
-          allOf: [{ $ref: getSchemaPath(ApiErrorResponseDto) }],
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        examples: {
+          unauthorized: {
+            summary: 'Not authenticated',
+            value: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+          },
+          forbidden: {
+            summary: "Can't access meal",
+            value: CANT_ACCESS_MEAL_401,
+          },
         },
-        example: UNAUTHORIZEDEXCEPTION_RESPONSE_401,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Resource not found',
+    content: {
+      'application/json': {
+        schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+        examples: {
+          mealNotFound: {
+            summary: 'Meal not found',
+            value: MEAL_DOSENT_EXIST_404,
+          },
+        },
       },
     },
   })
