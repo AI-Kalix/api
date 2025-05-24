@@ -13,8 +13,12 @@ import { AIResponseDto } from './dto/aiResponse/aiResponse.dto';
 import { NutrionalTableDto } from './dto/aiResponse/nutrionalTable.dto';
 import { QuestionDto } from './dto/aiResponse/question.dto';
 import { CreateMealDto } from './dto/create-meal.dto';
-import { WebhookType } from './decorator/validate-polymorphic-data.decorator';
+import { AIresponseType } from './decorator/validate-polymorphic-data.decorator';
 import { AiAnalysisService } from './aiAnalysis/aiAnalysis.service';
+import {
+  InvalidImageDto,
+  ReasonInvalidImage,
+} from './dto/aiResponse/invalideImage.dto';
 
 @Injectable()
 export class MealService extends Service {
@@ -43,13 +47,9 @@ export class MealService extends Service {
       if (!existing) throw new NotFoundException("This meal doesn't exist");
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
-
-      const aiResponse = await this.aiAnalysis(
-        existing.imageKey,
-        user.id,
-        answers,
-      );
-      if (aiResponse.type === WebhookType.SUCCESS) {
+      const existingImage = await this.s3Service.getUrl(existing.imageKey);
+      const aiResponse = await this.aiAnalysis(existingImage, user.id, answers);
+      if (aiResponse.type === AIresponseType.SUCCESS) {
         const table = aiResponse.data as NutrionalTableDto;
         const updated = await this.prisma.meal.update({
           where: { id: mealId },
@@ -70,6 +70,15 @@ export class MealService extends Service {
     const key = imageInfo.key;
     const imageUrl = await this.s3Service.getUrl(imageInfo.id);
 
+    const aiResponse = await this.aiAnalysis(imageUrl, user.id);
+
+    if (aiResponse.type === AIresponseType.INVALID_IMAGE) {
+      const invalidImage = aiResponse.data as InvalidImageDto;
+      throw new BadRequestException(
+        `Invalid image: ${invalidImage.reason} - ${invalidImage.errorMessage}`,
+      );
+    }
+
     const meal = await this.prisma.meal.create({
       data: {
         imageKey: key,
@@ -77,9 +86,6 @@ export class MealService extends Service {
         isAIAnalysisDone: false,
       },
     });
-
-    const aiResponse = await this.aiAnalysis(imageUrl, user.id);
-
     if (aiResponse.data instanceof Array) {
       const questions = aiResponse.data as QuestionDto[];
       await this.prisma.meal.update({
@@ -164,26 +170,36 @@ export class MealService extends Service {
         calories: 250,
       };
 
-      const response: AIResponseDto = {
-        type: WebhookType.SUCCESS,
+      return {
+        type: AIresponseType.SUCCESS,
         data: nutritionalTable,
       };
-      return response;
     }
 
-    const canGenerateDirectly = this.shouldSimulateDirectSuccess();
+    const simulatedResponseType = this.simulateResponseType();
 
-    if (canGenerateDirectly) {
+    if (simulatedResponseType === AIresponseType.SUCCESS) {
       const nutritionalTable = {
         name: 'KFC',
         calories: 250,
       };
 
-      const response: AIResponseDto = {
-        type: WebhookType.SUCCESS,
+      return {
+        type: AIresponseType.SUCCESS,
         data: nutritionalTable,
       };
-      return response;
+    }
+
+    if (simulatedResponseType === AIresponseType.INVALID_IMAGE) {
+      const invalidImage: InvalidImageDto = {
+        reason: ReasonInvalidImage.NOT_FOOD,
+        errorMessage: 'Image is not a valid food image',
+      };
+
+      return {
+        type: AIresponseType.INVALID_IMAGE,
+        data: invalidImage,
+      };
     }
 
     const questions: QuestionDto[] = [
@@ -198,15 +214,20 @@ export class MealService extends Service {
     ];
 
     return {
-      type: WebhookType.DOUBTS,
+      type: AIresponseType.DOUBTS,
       data: questions,
     };
   }
 
   private analysisCounter = 0;
-  private shouldSimulateDirectSuccess(): boolean {
+
+  private simulateResponseType(): AIresponseType {
     this.analysisCounter++;
-    return this.analysisCounter % 2 === 0;
+    const mod = this.analysisCounter % 3;
+
+    if (mod === 0) return AIresponseType.SUCCESS;
+    if (mod === 1) return AIresponseType.DOUBTS;
+    return AIresponseType.INVALID_IMAGE;
   }
 
   async aiAnalysisOriginal(
@@ -214,11 +235,16 @@ export class MealService extends Service {
     userId: string,
     answers?: QuestionDto[],
   ) {
-    const response = await this.aiAnalysisService.analyze({
+    const body = {
       resource,
       userId,
-      answers: answers ?? [],
-    });
+    };
+
+    if (answers && answers.length > 0) {
+      body['answers'] = answers;
+    }
+
+    const response = await this.aiAnalysisService.analyze(body);
 
     return response;
   }

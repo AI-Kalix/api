@@ -104,6 +104,14 @@ export const CANT_ACCESS_MEAL_401 = {
   errors: ["You can't access this meal"],
 };
 
+export const INVALID_IMAGE_400 = {
+  statusCode: 400,
+  timestamp: '2025-05-21T15:56:20.386Z',
+  success: false,
+  message: 'Something went wrong.',
+  errors: ['Invalid image: NOT_FOOD - Image is not a valid food image'],
+};
+
 export const NO_FILE_UPLOADED_400 = {
   statusCode: 400,
   timestamp: '2025-05-15T16:06:12.123Z',
