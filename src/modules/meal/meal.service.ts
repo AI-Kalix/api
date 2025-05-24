@@ -48,11 +48,7 @@ export class MealService extends Service {
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
       const existingImage = await this.s3Service.getUrl(existing.imageKey);
-      const aiResponse = await this.aiAnalysisOriginal(
-        existingImage,
-        user.id,
-        answers,
-      );
+      const aiResponse = await this.aiAnalysis(existingImage, user.id, answers);
       if (aiResponse.type === AIresponseType.SUCCESS) {
         const table = aiResponse.data as NutrionalTableDto;
         const updated = await this.prisma.meal.update({
