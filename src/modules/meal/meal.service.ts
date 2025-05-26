@@ -208,12 +208,12 @@ export class MealService extends Service {
 
     const questions: QuestionDto[] = [
       {
-        choiceType: ChoiceType.MULTIPLE_CHOICES,
+        choiceType: ChoiceType.MULTIPLE,
         question: '¿Cuánta carne contiene el plato?',
         options: ['Nada', 'Poca', 'Moderada', 'Mucha'],
       },
       {
-        choiceType: ChoiceType.SINGLE_CHOICE,
+        choiceType: ChoiceType.SINGLE,
         question: '¿Contiene ingredientes fritos?',
         options: ['Sí', 'No', 'No estoy seguro'],
       },

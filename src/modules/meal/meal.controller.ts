@@ -96,12 +96,14 @@ export class MealController {
   {
     "questions": [
       {
-        "question": "¿Qué ingredientes tiene el plato?",
-        "options": ["ARROZ", "CARNE", "VERDURAS"]
+        "choiceType": "MULTIPLE",
+        "question": "What ingredients does the dish have?",
+        "options": ["CHICKEN", "RICE", "VEGETABLES"]
       },
       {
-        "question": "¿Qué nivel de grasa tiene?",
-        "options": ["Alta", "Media", "Baja"]
+        "choiceType": "SINGLE",
+        "question": "What is the fat level?",
+        "options": ["High", "Medium", "Low"]
       }
     ],
     "id": "7ab123d1-fd44-4b87-bb47-43f38fa83e89"
@@ -122,11 +124,13 @@ export class MealController {
     "id": "7ab123d1-fd44-4b87-bb47-43f38fa83e89",
     "data": [
       {
+        "choiceType": "MULTIPLE",
         "question": "What ingredients does the dish have?",
         "options": ["CHICKEN", "RICE", "VEGETABLES"],
-        "answer": ["chicken", "rice"]
+        "answer": ["CHICKEN", "RICE"]
       },
       {
+        "choiceType": "SINGLE",
         "question": "What is the fat level?",
         "options": ["High", "Medium", "Low"],
         "answer": ["Medium"]

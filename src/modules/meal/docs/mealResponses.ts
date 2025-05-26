@@ -1,13 +1,12 @@
 export const POST_MEAL_RESPONSE_SUCCESS_201 = {
   statusCode: 201,
-  timestamp: '2025-05-15T15:46:03.362Z',
+  timestamp: '2025-05-26T14:43:46.915Z',
   success: true,
   message: 'Meal created successfully',
   data: {
-    id: '8b0e6ad6-0588-4907-8038-6a28f721906d',
-    userId: '810ee492-3690-4873-aaab-0db9e536cec8',
-    imageKey:
-      'uploads/meal/1747323929787-Captura de pantalla 2024-01-23 123533.png',
+    id: '4eda6b00-229e-4d1f-a154-f6270a591503',
+    userId: '4fd35ebb-b7f6-4fb2-a327-21ca9c08e805',
+    imageKey: 'uploads/meal/1748270626609-ensalada estetica 2.jpg',
     nutrionalTable: {
       name: 'KFC',
       calories: 250,
@@ -17,66 +16,67 @@ export const POST_MEAL_RESPONSE_SUCCESS_201 = {
     location: null,
     isAIAnalysisDone: true,
     globalStatus: 'ACTIVE',
-    createdAt: '2025-05-15T15:46:03.277Z',
-    updatedAt: '2025-05-15T15:46:03.341Z',
+    createdAt: '2025-05-26T14:43:46.905Z',
+    updatedAt: '2025-05-26T14:43:46.908Z',
     imageUrl:
-      'https://kalix-bucket-s3.s3.us-east-1.amazonaws.com/uploads/meal/1747323929787-Captura%20de%20pantalla%202024-01-23%20123533.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2NK3YNQGJ3YD5XX3%2F20250515%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250515T154603Z&X-Amz-Expires=172800&X-Amz-Signature=477361031edd6cf3fd714cb1574a2af29551af5269727f89b38c8021a9cf6c09&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject',
+      'https://kalix-bucket-s3.s3.us-east-1.amazonaws.com/uploads/meal/1748270626609-ensalada%20estetica%202.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2NK3YNQGJ3YD5XX3%2F20250526%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250526T144346Z&X-Amz-Expires=172800&X-Amz-Signature=1a97a4acbf34330811d5dee366cd3164a01e53c9c2610f344aff399e12b7a47c&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject',
   },
 };
 
 export const POST_MEAL_RESPONSE_SUCCESS_201_V2 = {
   statusCode: 201,
-  timestamp: '2025-05-16T14:38:37.356Z',
+  timestamp: '2025-05-26T14:42:18.387Z',
   success: true,
   message: 'Meal created successfully',
   data: {
-    id: '3d768e2d-2e6f-4b4d-8209-1162a3aad507',
-    userId: '1d4c1456-b166-4e61-9d42-0fe585a24664',
-    imageKey: 'uploads/meal/1747406190064-bakstreet boys.png',
+    id: 'ba884d35-432a-462b-b8b2-7c7a98d99a89',
+    userId: '4fd35ebb-b7f6-4fb2-a327-21ca9c08e805',
+    imageKey: 'uploads/meal/1748270076740-ensalada estetica 2.jpg',
     nutrionalTable: {
       name: 'KFC',
       calories: 250,
     },
     questions: [
       {
-        answer: ['Nada', 'Poca'],
         options: ['Nada', 'Poca', 'Moderada', 'Mucha'],
         question: '¿Cuánta carne contiene el plato?',
+        choiceType: 'MULTIPLE',
       },
       {
-        answer: ['No estoy seguro', 'No'],
         options: ['Sí', 'No', 'No estoy seguro'],
         question: '¿Contiene ingredientes fritos?',
+        choiceType: 'SINGLE',
       },
     ],
     name: null,
     location: null,
     isAIAnalysisDone: true,
     globalStatus: 'ACTIVE',
-    createdAt: '2025-05-16T14:36:31.150Z',
-    updatedAt: '2025-05-16T14:38:37.330Z',
+    createdAt: '2025-05-26T14:34:37.913Z',
+    updatedAt: '2025-05-26T14:42:18.377Z',
     imageUrl:
-      'https://kalix-bucket-s3.s3.us-east-1.amazonaws.com/uploads/meal/1747406190064-bakstreet%20boys.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2NK3YNQGJ3YD5XX3%2F20250516%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250516T143837Z&X-Amz-Expires=172800&X-Amz-Signature=60614ea5944c1bf75e30e002fd14abf045dde62b5be0752b79feb7ca5d6f6890&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject',
+      'https://kalix-bucket-s3.s3.us-east-1.amazonaws.com/uploads/meal/1748270076740-ensalada%20estetica%202.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2NK3YNQGJ3YD5XX3%2F20250526%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250526T144218Z&X-Amz-Expires=172800&X-Amz-Signature=a03b52cc22727a3562b27629bcea5e6537966545d11d47de684aef6a58beb693&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject',
   },
 };
-
 export const POST_MEAL_RESPONSE_QUESTION_201 = {
   statusCode: 201,
-  timestamp: '2025-05-15T15:49:52.382Z',
+  timestamp: '2025-05-26T14:42:54.372Z',
   success: true,
   message: 'Meal created successfully',
   data: {
     questions: [
       {
+        choiceType: 'MULTIPLE',
         question: '¿Cuánta carne contiene el plato?',
         options: ['Nada', 'Poca', 'Moderada', 'Mucha'],
       },
       {
+        choiceType: 'SINGLE',
         question: '¿Contiene ingredientes fritos?',
         options: ['Sí', 'No', 'No estoy seguro'],
       },
     ],
-    id: 'c48a04ff-9833-4211-9efc-2f22ec8f7968',
+    id: '88accf1b-7a8d-453c-986c-4e640eab9bc6',
   },
 };
 
