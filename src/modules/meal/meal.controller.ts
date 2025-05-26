@@ -15,7 +15,7 @@ import { UpdateMealDto } from './dto/update-meal.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MealImageUrlInterceptor } from './interceptor/meal-image.interceptor';
 import { Auth } from '../auth/decorators/auth.decorator';
-import { Role, User } from '@prisma/client';
+import { Meal, Role, User } from '@prisma/client';
 import { ActiveUser } from '../auth/decorators/session.decorator';
 import { PaginationDto } from 'src/common/Pagination.dto';
 import { ResponseMessage } from 'src/decorators/responseMessage.decorator';
@@ -379,7 +379,10 @@ export class MealController {
       },
     },
   })
-  async findOne(@Param('mealId') mealId: string, @ActiveUser() user: User) {
+  async findOne(
+    @Param('mealId') mealId: string,
+    @ActiveUser() user: User,
+  ): Promise<Meal> {
     return this.mealService.findOne(mealId, user);
   }
 
@@ -447,7 +450,10 @@ export class MealController {
       },
     },
   })
-  async remove(@Param('mealId') mealId: string, @ActiveUser() user: User) {
+  async remove(
+    @Param('mealId') mealId: string,
+    @ActiveUser() user: User,
+  ): Promise<Meal> {
     return this.mealService.remove(mealId, user);
   }
 }
