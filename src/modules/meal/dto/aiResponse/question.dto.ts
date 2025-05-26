@@ -8,14 +8,14 @@ import {
 } from 'class-validator';
 
 export enum ChoiceType {
-  MULTIPLE_CHOICES = 'MULTIPLE CHOICES',
-  SINGLE_CHOICE = 'SINGLE CHOICES',
+  MULTIPLE = 'MULTIPLE',
+  SINGLE = 'SINGLE',
 }
 
 export class QuestionDto {
   @ApiProperty({
     description: 'Type of question choice',
-    example: ChoiceType.MULTIPLE_CHOICES,
+    example: ChoiceType.MULTIPLE,
   })
   @IsEnum(ChoiceType)
   @IsNotEmpty()
