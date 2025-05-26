@@ -11,7 +11,7 @@ import { Meal, User } from '@prisma/client';
 import { PaginationDto } from 'src/common/Pagination.dto';
 import { AIResponseDto } from './dto/aiResponse/aiResponse.dto';
 import { NutrionalTableDto } from './dto/aiResponse/nutrionalTable.dto';
-import { QuestionDto } from './dto/aiResponse/question.dto';
+import { ChoiceType, QuestionDto } from './dto/aiResponse/question.dto';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { AIresponseType } from './decorator/validate-polymorphic-data.decorator';
 import { AiAnalysisService } from './aiAnalysis/aiAnalysis.service';
@@ -48,7 +48,11 @@ export class MealService extends Service {
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
       const existingImage = await this.s3Service.getUrl(existing.imageKey);
-      const aiResponse = await this.aiAnalysis(existingImage, user.id, answers);
+      const aiResponse = await this.aiAnalysisSimulated(
+        existingImage,
+        user.id,
+        answers,
+      );
       if (aiResponse.type === AIresponseType.SUCCESS) {
         const table = aiResponse.data as NutrionalTableDto;
         const updated = await this.prisma.meal.update({
@@ -70,7 +74,7 @@ export class MealService extends Service {
     const key = imageInfo.key;
     const imageUrl = await this.s3Service.getUrl(imageInfo.id);
 
-    const aiResponse = await this.aiAnalysis(imageUrl, user.id);
+    const aiResponse = await this.aiAnalysisSimulated(imageUrl, user.id);
 
     if (aiResponse.type === AIresponseType.INVALID_IMAGE) {
       const invalidImage = aiResponse.data as InvalidImageDto;
@@ -159,7 +163,7 @@ export class MealService extends Service {
     return await this.prisma.meal.delete({ where: { id: mealId } });
   }
 
-  async aiAnalysis(
+  async aiAnalysisSimulated(
     resource: string,
     userId: string,
     answers?: QuestionDto[],
@@ -204,10 +208,12 @@ export class MealService extends Service {
 
     const questions: QuestionDto[] = [
       {
+        choiceType: ChoiceType.MULTIPLE,
         question: '¿Cuánta carne contiene el plato?',
         options: ['Nada', 'Poca', 'Moderada', 'Mucha'],
       },
       {
+        choiceType: ChoiceType.SINGLE,
         question: '¿Contiene ingredientes fritos?',
         options: ['Sí', 'No', 'No estoy seguro'],
       },

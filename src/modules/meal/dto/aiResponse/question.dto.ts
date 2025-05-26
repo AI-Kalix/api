@@ -1,7 +1,25 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsArray, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsOptional,
+  IsEnum,
+  IsNotEmpty,
+} from 'class-validator';
+
+export enum ChoiceType {
+  MULTIPLE = 'MULTIPLE',
+  SINGLE = 'SINGLE',
+}
 
 export class QuestionDto {
+  @ApiProperty({
+    description: 'Type of question choice',
+    example: ChoiceType.MULTIPLE,
+  })
+  @IsEnum(ChoiceType)
+  @IsNotEmpty()
+  choiceType: ChoiceType;
   @ApiProperty({
     description: 'Question asked by the user',
     example: 'How much meat does the dish contain?',

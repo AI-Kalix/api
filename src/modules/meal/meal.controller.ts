@@ -15,7 +15,7 @@ import { UpdateMealDto } from './dto/update-meal.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MealImageUrlInterceptor } from './interceptor/meal-image.interceptor';
 import { Auth } from '../auth/decorators/auth.decorator';
-import { Role, User } from '@prisma/client';
+import { Meal, Role, User } from '@prisma/client';
 import { ActiveUser } from '../auth/decorators/session.decorator';
 import { PaginationDto } from 'src/common/Pagination.dto';
 import { ResponseMessage } from 'src/decorators/responseMessage.decorator';
@@ -96,12 +96,14 @@ export class MealController {
   {
     "questions": [
       {
-        "question": "¿Qué ingredientes tiene el plato?",
-        "options": ["ARROZ", "CARNE", "VERDURAS"]
+        "choiceType": "MULTIPLE",
+        "question": "What ingredients does the dish have?",
+        "options": ["CHICKEN", "RICE", "VEGETABLES"]
       },
       {
-        "question": "¿Qué nivel de grasa tiene?",
-        "options": ["Alta", "Media", "Baja"]
+        "choiceType": "SINGLE",
+        "question": "What is the fat level?",
+        "options": ["High", "Medium", "Low"]
       }
     ],
     "id": "7ab123d1-fd44-4b87-bb47-43f38fa83e89"
@@ -122,11 +124,13 @@ export class MealController {
     "id": "7ab123d1-fd44-4b87-bb47-43f38fa83e89",
     "data": [
       {
+        "choiceType": "MULTIPLE",
         "question": "What ingredients does the dish have?",
         "options": ["CHICKEN", "RICE", "VEGETABLES"],
-        "answer": ["chicken", "rice"]
+        "answer": ["CHICKEN", "RICE"]
       },
       {
+        "choiceType": "SINGLE",
         "question": "What is the fat level?",
         "options": ["High", "Medium", "Low"],
         "answer": ["Medium"]
@@ -379,7 +383,10 @@ export class MealController {
       },
     },
   })
-  async findOne(@Param('mealId') mealId: string, @ActiveUser() user: User) {
+  async findOne(
+    @Param('mealId') mealId: string,
+    @ActiveUser() user: User,
+  ): Promise<Meal> {
     return this.mealService.findOne(mealId, user);
   }
 
@@ -447,7 +454,10 @@ export class MealController {
       },
     },
   })
-  async remove(@Param('mealId') mealId: string, @ActiveUser() user: User) {
+  async remove(
+    @Param('mealId') mealId: string,
+    @ActiveUser() user: User,
+  ): Promise<Meal> {
     return this.mealService.remove(mealId, user);
   }
 }
