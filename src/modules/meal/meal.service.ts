@@ -173,39 +173,32 @@ export class MealService extends Service {
         name: 'KFC',
         calories: 250,
       };
-
       return {
         type: AIresponseType.SUCCESS,
         data: nutritionalTable,
       };
     }
-
     const simulatedResponseType = this.simulateResponseType();
-
     if (simulatedResponseType === AIresponseType.SUCCESS) {
       const nutritionalTable = {
         name: 'KFC',
         calories: 250,
       };
-
       return {
         type: AIresponseType.SUCCESS,
         data: nutritionalTable,
       };
     }
-
     if (simulatedResponseType === AIresponseType.INVALID_IMAGE) {
       const invalidImage: InvalidImageDto = {
         reason: ReasonInvalidImage.NOT_FOOD,
         errorMessage: 'Image is not a valid food image',
       };
-
       return {
         type: AIresponseType.INVALID_IMAGE,
         data: invalidImage,
       };
     }
-
     const questions: QuestionDto[] = [
       {
         choiceType: ChoiceType.MULTIPLE,
@@ -218,19 +211,16 @@ export class MealService extends Service {
         options: ['Sí', 'No', 'No estoy seguro'],
       },
     ];
-
     return {
       type: AIresponseType.DOUBTS,
       data: questions,
     };
   }
-
   private analysisCounter = 0;
 
   private simulateResponseType(): AIresponseType {
     this.analysisCounter++;
     const mod = this.analysisCounter % 3;
-
     if (mod === 0) return AIresponseType.SUCCESS;
     if (mod === 1) return AIresponseType.DOUBTS;
     return AIresponseType.INVALID_IMAGE;
@@ -245,13 +235,10 @@ export class MealService extends Service {
       resource,
       userId,
     };
-
     if (answers && answers.length > 0) {
       body['answers'] = answers;
     }
-
     const response = await this.aiAnalysisService.analyze(body);
-
     return response;
   }
 }
