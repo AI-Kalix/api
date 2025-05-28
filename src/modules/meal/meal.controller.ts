@@ -121,7 +121,7 @@ export class MealController {
   
   \`\`\`json
   {
-    "id": "7ab123d1-fd44-4b87-bb47-43f38fa83e89",
+    "mealId": "7ab123d1-fd44-4b87-bb47-43f38fa83e89",
     "data": [
       {
         "choiceType": "MULTIPLE",
@@ -212,7 +212,7 @@ export class MealController {
             value: POST_MEAL_RESPONSE_QUESTION_201,
           },
           createWithSuccessV2: {
-            summary: 'Alternative response format with enriched data',
+            summary: 'Meal created affter answering AI questions',
             value: POST_MEAL_RESPONSE_SUCCESS_201_V2,
           },
         },
@@ -283,7 +283,7 @@ export class MealController {
   @UseInterceptors(MealImageUrlInterceptor)
   @Auth([Role.USER])
   @ResponseMessage('Meals obtained successfully')
-  @ApiOperation({ summary: 'Get all meals' })
+  @ApiOperation({ summary: 'Get all meals by authUser' })
   @ApiResponse({
     status: 200,
     description: 'Meals obtained successfully',
