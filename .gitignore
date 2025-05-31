@@ -4,6 +4,7 @@
 /build
 package-lock.json
 yarn.lock
+/ai
 
 # Logs
 logs
