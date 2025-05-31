@@ -9,8 +9,7 @@ export class AiAnalysisService {
   constructor(private httpService: HttpService) {}
 
   async analyze(data: AnalyzeMealDto): Promise<AIResponseDto> {
-    const url =
-      'https://wants-curve-ending-myanmar.trycloudflare.com/api/analysis';
+    const url = 'http://localhost:5008/api/analysis';
 
     try {
       const response = await firstValueFrom(
