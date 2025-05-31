@@ -48,7 +48,7 @@ export class MealService extends Service {
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
       const existingImage = await this.s3Service.getUrl(existing.imageKey);
-      const aiResponse = await this.aiAnalysisSimulated(
+      const aiResponse = await this.aiAnalysisOriginal(
         existingImage,
         user.id,
         answers,
@@ -74,7 +74,7 @@ export class MealService extends Service {
     const key = imageInfo.key;
     const imageUrl = await this.s3Service.getUrl(imageInfo.id);
 
-    const aiResponse = await this.aiAnalysisSimulated(imageUrl, user.id);
+    const aiResponse = await this.aiAnalysisOriginal(imageUrl, user.id);
 
     if (aiResponse.type === AIresponseType.INVALID_IMAGE) {
       const invalidImage = aiResponse.data as InvalidImageDto;

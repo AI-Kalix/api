@@ -13,7 +13,7 @@ import { NutrionalTableDto } from '../dto/aiResponse/nutrionalTable.dto';
 export enum AIresponseType {
   SUCCESS = 'SUCCESS',
   DOUBTS = 'DOUBTS',
-  INVALID_IMAGE = 'INVALID IMAGE',
+  INVALID_IMAGE = 'INVALID_IMAGE',
 }
 
 @ValidatorConstraint({ async: false })
