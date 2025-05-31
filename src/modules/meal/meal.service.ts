@@ -9,17 +9,12 @@ import { S3Service } from '../aws/s3/s3.service';
 import { Service } from 'src/service';
 import { Meal, User } from '@prisma/client';
 import { PaginationDto } from 'src/common/Pagination.dto';
-import { AIResponseDto } from './dto/aiResponse/aiResponse.dto';
 import { NutrionalTableDto } from './dto/aiResponse/nutrionalTable.dto';
-import { ChoiceType, QuestionDto } from './dto/aiResponse/question.dto';
+import { QuestionDto } from './dto/aiResponse/question.dto';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { AIresponseType } from './decorator/validate-polymorphic-data.decorator';
 import { AiAnalysisService } from './aiAnalysis/aiAnalysis.service';
-import {
-  InvalidImageDto,
-  ReasonInvalidImage,
-} from './dto/aiResponse/invalideImage.dto';
-
+import { InvalidImageDto } from './dto/aiResponse/invalideImage.dto';
 @Injectable()
 export class MealService extends Service {
   constructor(
@@ -48,7 +43,7 @@ export class MealService extends Service {
       if (existing.userId !== user.id)
         throw new UnauthorizedException("You can't access this meal");
       const existingImage = await this.s3Service.getUrl(existing.imageKey);
-      const aiResponse = await this.aiAnalysisSimulated(
+      const aiResponse = await this.aiAnalysisOriginal(
         existingImage,
         user.id,
         answers,
@@ -74,7 +69,7 @@ export class MealService extends Service {
     const key = imageInfo.key;
     const imageUrl = await this.s3Service.getUrl(imageInfo.id);
 
-    const aiResponse = await this.aiAnalysisSimulated(imageUrl, user.id);
+    const aiResponse = await this.aiAnalysisOriginal(imageUrl, user.id);
 
     if (aiResponse.type === AIresponseType.INVALID_IMAGE) {
       const invalidImage = aiResponse.data as InvalidImageDto;
@@ -163,59 +158,6 @@ export class MealService extends Service {
     return await this.prisma.meal.delete({ where: { id: mealId } });
   }
 
-  async aiAnalysisSimulated(
-    resource: string,
-    userId: string,
-    answers?: QuestionDto[],
-  ): Promise<AIResponseDto> {
-    if (answers && answers.length > 0) {
-      const nutritionalTable = {
-        name: 'KFC',
-        calories: 250,
-      };
-      return {
-        type: AIresponseType.SUCCESS,
-        data: nutritionalTable,
-      };
-    }
-    const simulatedResponseType = this.simulateResponseType();
-    if (simulatedResponseType === AIresponseType.SUCCESS) {
-      const nutritionalTable = {
-        name: 'KFC',
-        calories: 250,
-      };
-      return {
-        type: AIresponseType.SUCCESS,
-        data: nutritionalTable,
-      };
-    }
-    if (simulatedResponseType === AIresponseType.INVALID_IMAGE) {
-      const invalidImage: InvalidImageDto = {
-        reason: ReasonInvalidImage.NOT_FOOD,
-        errorMessage: 'Image is not a valid food image',
-      };
-      return {
-        type: AIresponseType.INVALID_IMAGE,
-        data: invalidImage,
-      };
-    }
-    const questions: QuestionDto[] = [
-      {
-        choiceType: ChoiceType.MULTIPLE,
-        question: '¿Cuánta carne contiene el plato?',
-        options: ['Nada', 'Poca', 'Moderada', 'Mucha'],
-      },
-      {
-        choiceType: ChoiceType.SINGLE,
-        question: '¿Contiene ingredientes fritos?',
-        options: ['Sí', 'No', 'No estoy seguro'],
-      },
-    ];
-    return {
-      type: AIresponseType.DOUBTS,
-      data: questions,
-    };
-  }
   private analysisCounter = 0;
 
   private simulateResponseType(): AIresponseType {
